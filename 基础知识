@@ -7,3 +7,31 @@ MVVM(Model-View-ViewModel)
 从 Model,当更新Model上的数据时，Data Bindings工具会更新页面中的DOM元素。
  
 定义 View，定义Model，创建一个Vue实例或“ViewModel”，用于连接View和Model。
+
+v-model 在表单元素上创建双向数据绑定。
+
+v-if 条件渲染指令，根据表达式的真假来删除和插入元素。
+v-show 条件渲染指令，元素始终会被渲染到HTML，只是简单地为元素设置CSS的style属性。（display）
+v-else 元素必须立即跟在v-if或v-else-if元素的后面，否则不能识别。
+ 
+v-for 基于一个数组渲染一个列表
+      支持一个可选的第二个参数作为当前项的索引。
+      v-for="(item, index) in items"
+      迭代对象的属性和值
+      <span v-for="n in 10">{{n}}</span>
+      1 2 3 4 5 6 7 8 9 10
+      但是index是从0开始迭代。
+      
+v-for优先级比v-if高
+ 
+v-if是惰性的，在条件第一次变为真时才开始局部编译（编译会被缓存）。
+v-show元素始终被编译并保留。
+v-if有更高的切换消耗而v-show有更高的初始渲染消耗
+ 
+v-bind:argument="expression" 绑定属性
+缩写 :argument="expression"
+
+v-on用于监听DOM事件
+    绑定一个方法（让事件指向方法的引用）
+    使用内联语句，调用
+缩写 @
