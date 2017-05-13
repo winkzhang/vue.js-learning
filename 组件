@@ -72,3 +72,141 @@
     })
     Child组件是在Parent组件中注册的，它只能在Parent组件中使用。
     子组件只能在父组件的template中使用。
+
+组件注册语法糖
+  使用Vue.component()直接创建和注册组件：
+  // 全局注册，my-component1是标签名称
+  Vue.component('my-component1', {
+      template: '<div>This is the first component!</div>'
+  })
+  
+  var vm1 = new Vue({
+      el: '#app1'
+  })
+  Vue在背后会自动调用Vue.extend()。
+  
+  在选项对象的components属性中实现局部注册：
+  var vm2 = new Vue({
+      el: '#app2',
+      components: {
+          // 局部注册，my-component2是标签名称
+          'my-component2': {
+              template: '<div>This is the second component!</div>'
+           },
+           // 局部注册，my-component3是标签名称
+           'my-component3': {
+               template: '<div>This is the third component!</div>'
+           }
+       }
+   })
+   
+使用script或template标签
+    使用<script>标签
+    <body>
+        <div id="app">
+            <my-component></my-component>
+        </div>
+        
+        <script type="text/x-template" id="myComponent">
+            <div>This is a component!</div>
+        </script>
+    </body>
+    <script src="js/vue.js"></script>
+    <script>
+        Vue.component('my-component', {
+            template: '#myComponent'
+        })
+        
+        new Vue({
+            el: '#app'
+         })
+     </script>
+     Vue.js根据template中的id来查找对应的元素，然后将这个元素内的HTML作为模板进行编译。
+     type=text/x-template，告诉浏览器这不是一段js脚本。
+     
+     使用<tempalte>标签
+     不需要指定type属性
+     <body>
+        <div id="app">
+            <my-component></my-component>
+        </div>
+        
+        <template id="myComponent">
+            <div>This is a component!</div>
+        </template>
+    </body>
+    <script src="js/vue.js"></script>
+    <script>
+        Vue.component('my-component', {
+            template: '#myComponent'
+        })
+        
+        new Vue({
+            el: '#app'
+         })
+     </script>
+     
+组件的el和data选项
+    在定义组件的选项时，data和el选项必须使用函数。
+    Vue.component('my-component', {
+        data: function() {
+            return {a : 1}
+        }
+    })
+    
+使用props
+    组件实例的作用域是孤立的，不能在子组件的模板内直接引用父组件的数据。可以使用props把数据传给子组件。
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            name: 'keepfool',
+            age: 28
+        },
+        components: {
+            'my-component': {
+                template: '#myComponent',
+                props: ['myName', 'myAge']
+             }
+         }
+     })
+     
+     定义子组件的HTML模板：
+     <template id="myComponent">
+         <table>
+             <tr>
+                 <th colspan="2">
+                     子组件数据
+                 </th>
+              </tr>
+              <tr>
+                  <td>my name</td>
+                  <td>{{ myName }}</td>
+              </tr>
+              <tr>
+                  <td>my age</td>
+                  <td>{{ myAge }} </td>
+              </tr>
+          </table>
+      </template>
+      
+      将父组件数据通过已定义好的props属性传递给子组件：
+      <div id="app">
+          <my-component v-bind:my-name="name" v-bind:my-age="age"></my-component>
+      </div>
+      HTML特性不区分大小写，驼峰myName要写为my-name。
+
+prop的绑定类型
+
+单向绑定
+prop默认是单向绑定，当父组件的属性变化时，将传导给子组件，但是反过来不会。
+
+双向绑定
+.sync
+<my-component v-bind:my-name.sync="name" v-bind:my-age.sync="age"></my-component>
+
+单次绑定
+.once
+<my-component v-bind:my-name.once="name" v-bind:my-age.once="age"></my-component>
+
+
+    
