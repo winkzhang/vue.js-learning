@@ -146,6 +146,17 @@
          })
      </script>
      
+内联模板
+
+如果子组件有 inline-template 特性，组件将把它的内容当作它的模板，而不是把它当作分发内容。这让模板更灵活。
+<my-component inline-template>
+  <div>
+    <p>These are compiled as the component's own template.</p>
+    <p>Not parent's transclusion content.</p>
+  </div>
+</my-component>
+
+
 组件的el和data选项
     在定义组件的选项时，data和el选项必须使用函数。
     Vue.component('my-component', {
@@ -200,13 +211,159 @@ prop的绑定类型
 单向绑定
 prop默认是单向绑定，当父组件的属性变化时，将传导给子组件，但是反过来不会。
 
-双向绑定
-.sync
-<my-component v-bind:my-name.sync="name" v-bind:my-age.sync="age"></my-component>
+注意在 JavaScript 中对象和数组是引用类型，指向同一个内存空间，如果 prop 是一个对象或数组，在子组件内部改变它会影响父组件的状态。
 
-单次绑定
-.once
-<my-component v-bind:my-name.once="name" v-bind:my-age.once="age"></my-component>
+Prop验证
 
-
+编译作用域
+    组件的作用域是组件模板包含的HTML片段，组件模板内容之外的就不是组件的作用域了。
+    组件选项对象中的数据是在组件模板中使用的。
+    new Vue({
+        el: '#app',
+        data: {
+            display: true
+        },
+        components: {
+            'my-component': {
+                template: '#myComponent',
+                data: function() {
+                    return {
+                        msg: 'This is a component!',
+                        display: false
+                    }
+                },
+                methods: {
+                    showMsg: function() {
+                        alert(this.msg)
+                    }
+                }
+            }
+        }
+    })
+    <div id="app">
+        <my-component v-show="display">
+        </my-component>
+    </div>
+    display数据，是来源于Vue实例。
+    父组件模板的内容在父组件作用域内编译；子组件模板的内容在子组件作用域内编译。
+    在子组件中定义的数据，只能用在子组件的模板。在父组件中定义的数据，只能用在父组件的模板。
     
+使用Slot
+
+单个Slot
+    内容插槽
+
+指定名称的slot
+    如果需要多个内容插槽，可以为slot元素指定name属性。
+    
+作用域插槽
+    子组件中：
+    <div class="child">
+      <slot text="hello from child"></slot>
+    </div>
+    将数据传递到插槽
+    父级中：
+    <div class="parent">
+      <child>
+        <template scope="props">
+          <span>hello from parent</span>
+          <span>{{ props.text }}</span>
+        </template>
+      </child>
+    </div>
+    具有特殊属性 scope 的 <template> 元素，表示它是作用域插槽的模板。
+    scope 的值对应一个临时变量名，此变量接收从子组件中传递的 prop 对象。
+    渲染之后的输出结果：
+    <div class="parent">
+      <div class="child">
+        <span>hello from parent</span>
+        <span>hello from child</span>
+      </div>
+    </div>
+        
+父子组件之间的访问
+    父组件访问子组件：使用$children或$refs
+    子组件访问父组件：使用$parent
+    子组件访问根组件：使用$root
+
+    组件个数较多时，通过序号访问子组件不是很方便。
+    在子组件上使用v-ref指令，可以给子组件指定一个索引ID。
+    
+自定义事件
+
+派发事件 $dispatch()
+1、子组件的button元素绑定了click事件，该事件指向notify方法
+2、子组件的notify方法在处理时，调用了$dispatch，将事件派发到父组件的child-msg事件，并给该事件提供了一个msg参数。
+3、父组件的events选项中定义了child-msg事件，父组件接收到子组件的派发后，调用chld-msg事件。
+
+广播事件 $broadcast()
+
+监听事件 $on()
+
+在它上面触发事件 $emit()
+
+给组件绑定原生事件
+在某个组件的根元素上监听一个原生事件：使用 .native 修饰 v-on
+<my-component v-on:click.native="doTheThing"></my-component>
+
+
+
+要确保在初始化根实例之前注册了组件
+    // 注册
+    Vue.component('my-component', {
+      template: '<div>A custom component!</div>'
+    })
+    // 创建根实例
+    new Vue({
+      el: '#example'
+    })
+    
+在自定义组件中使用受限制的元素会导致一些问题<ul> <ol> <table> <select>
+<table>
+  <my-row>...</my-row>
+</table>
+自定义组件 <my-row> 被认为是无效的内容
+<table>
+  <tr is="my-row"></tr>
+</table>
+
+初学者常犯的一个错误是使用字面量语法传递数值：
+<!-- 传递了一个字符串"1" -->
+<comp some-prop="1"></comp>
+因为它是一个字面 prop ，它的值以字符串 "1" 而不是以实际的数字传下去。如果想传递一个实际的 JavaScript 数字，需要使用 v-bind ，从而让它的值被当作 JavaScript 表达式计算：
+<!-- 传递实际的数字 -->
+<comp v-bind:some-prop="1"></comp>
+
+动态组件
+var vm = new Vue({
+  el: '#example',
+  data: {
+    currentView: 'home'
+  },
+  components: {
+    home: { /* ... */ },
+    posts: { /* ... */ },
+    archive: { /* ... */ }
+  }
+})
+
+<component v-bind:is="currentView">
+  <!-- 组件在 vm.currentview 变化时改变！ -->
+</component>
+
+keep-alive
+如果把切换出去的组件保留在内存中，可以保留它的状态或避免重新渲染。
+
+使用v-once的低开销静态组件
+当组件中包含大量静态内容时，可以考虑使用 v-once 将渲染结果缓存起来，就像这样：
+Vue.component('terms-of-service', {
+  template: '
+    <div v-once>
+      <h1>Terms of Service</h1>
+      ... a lot of static content ...
+    </div>
+  '
+})
+
+
+
